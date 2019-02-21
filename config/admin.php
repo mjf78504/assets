@@ -11,7 +11,7 @@ return [
     | login page.
     |
     */
-    'name' => 'Laravel-admin',
+    'name' => 'IT资产管理系统',
 
     /*
     |--------------------------------------------------------------------------
@@ -22,7 +22,7 @@ return [
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<b>Laravel</b> admin',
+    'logo' => '<b>Assets</b> admin',
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
     | '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo-mini' => '<b>La</b>',
+    'logo-mini' => '<b>Ass</b>',
 
     /*
     |--------------------------------------------------------------------------
@@ -48,7 +48,7 @@ return [
     */
     'route' => [
 
-        'prefix' => 'admin',
+        'prefix' => '', // 前缀
 
         'namespace' => 'App\\Admin\\Controllers',
 
@@ -75,7 +75,7 @@ return [
     | Html title for all pages.
     |
     */
-    'title' => 'Admin',
+    'title' => 'Assets',
 
     /*
     |--------------------------------------------------------------------------

@@ -4,6 +4,10 @@ namespace App\Admin\Controllers;
 
 use App\Models\NetDevice;
 use App\Models\PubProperty;
+use App\Models\PubCategory;
+use App\Models\PubManufacturer;
+use App\Models\PubContract;
+
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
@@ -90,31 +94,33 @@ class NetDeviceController extends Controller
     {
         $grid = new Grid(new NetDevice);
 
-        $grid->id('Id');
-        $grid->created_at('Created at');
-        $grid->updated_at('Updated at');
-        $grid->maintaindate('Maintaindate');
-        $grid->updatetime('Updatetime');
-        $grid->category('Category');
+        $grid->id('设备编号')->display(function($id) {
+            return 'NET' . str_pad($id, 8, '0', STR_PAD_LEFT);
+        });
+        // $grid->created_at('Created at');
+        // $grid->updated_at('Updated at');
+        $grid->category('种类');
         $grid->SN('SN');
-        $grid->name('Name');
-        $grid->type('Type');
-        $grid->devicetype('Devicetype');
-        $grid->producer('Producer');
-        $grid->supplier('Supplier');
-        $grid->contractprice('Contractprice');
-        $grid->contractNo('ContractNo');
-        $grid->status('Status');
-        $grid->location('Location');
-        $grid->description('Description');
-        $grid->manageIP('ManageIP');
-        $grid->appIP('AppIP');
-        $grid->hostname('Hostname');
-        $grid->project('Project');
-        $grid->level('Level');
-        $grid->statusofrecord('Statusofrecord');
-        $grid->extend1('Extend1');
-        $grid->extend2('Extend2');
+        $grid->name('名称');
+        $grid->type('类型');
+        $grid->devicetype('型号');
+        $grid->producer('制造商');
+        $grid->location('位置');
+        $grid->description('描述');
+        $grid->status('运行状态');
+        //$grid->supplier('供货商');
+        // $grid->contractprice('合同价格');
+        $grid->contractNo('合同编号');
+        $grid->maintaindate('维保');
+        //$grid->manageIP('管理IP');
+        //$grid->appIP('应用IP');
+        //$grid->hostname('主机名');
+        // $grid->project('所属项目');
+        $grid->level('等级');
+        $grid->updatetime('更新时间');
+        // $grid->statusofrecord('记录状态');
+        // $grid->extend1('Extend1');
+        // $grid->extend2('Extend2');
 
         return $grid;
     }
@@ -178,28 +184,63 @@ class NetDeviceController extends Controller
      */
 
     protected function form() {
+
         $form = new Form(new NetDevice);
 
         $form->row(function($row) use ($form){
-            $row->width(4)->text('name', '设备名称');
-            $row->width(4)->text('SN', 'SN');
-            $row->width(4)->text('category', '设备种类');
-            $row->width(4)->text('type', '设备类型');
+            
+            /** 获取分类信息*/
+            $categories = PubCategory::all();
+            $manufacturers = PubManufacturer::all();
+            $contracts = PubContract::all();
+
+            // 生成类别数组
+            $arr1 = [];
+            $arr2 = [];
+            $arr3 = [];
+            $arr4 = [];
+            $arr5 = [];
+            $arr6 = [];
+            foreach ($categories as $category) {
+                if ($category->parent_id == 4) {
+                    $arr1 = array_add($arr1, $category->id, $category->name);
+                }else if ($category->parent_id == 6) {
+                    $arr2 = array_add($arr2, $category->id, $category->name);
+                }else if ($category->parent_id == 24) {
+                    $arr3 = array_add($arr3, $category->id, $category->name);
+                }
+            };
+
+            // 生成厂商数组
+            foreach($manufacturers as $manufacturer) {
+                $arr5 = array_add($arr5, $manufacturer->id, $manufacturer->nickname);
+            };
+
+            // 生成合同数组
+            foreach($contracts as $contract) {
+                $arr4 = array_add($arr4, $contract->id, $contract->name);
+            };
+            
+            $row->width(4)->select('category', '设备种类')->options($arr1);
+            $row->width(4)->text('name', '设备名称')->rules('required|min:2');
+            $row->width(4)->text('SN', 'SN')->rules('required|min:3');          
+            $row->width(4)->select('type', '设备类型')->options($arr2);
             $row->width(4)->text('devicetype', '设备型号');
-            $row->width(4)->text('producer', '制造商');
-            $row->width(4)->text('supplier', '供货商');
-            // $row->decimal('contractprice', '合同价格');
-            $row->width(4)->text('contractNo', '合同编号');
-            $row->width(4)->select('status', '运行状态')->options(['0' => '启动', '1' => '停止']);
+            $row->width(4)->select('level', '设备等级')->options($arr3);
             $row->width(4)->text('location', '设备位置');
             $row->width(4)->text('description', '设备描述');
-            $row->width(4)->text('manageIP', '管理IP');
-            $row->width(4)->text('appIP', '应用IP');
-            $row->date('maintaindate', '維保日期')->default(date('Y-m-d'));
+            $row->width(4)->select('producer', '制造商')->options($arr5);
+            $row->width(4)->select('supplier', '供货商')->options($arr5);
+            // $row->decimal('contractprice', '合同价格');
+            $row->width(4)->select('contractNo', '合同')->options($arr4);
+            $row->width(4)->select('status', '运行状态')->options(['0' => '启动', '1' => '停止']);
+            $row->width(4)->ip('manageIP', '管理IP');
+            $row->width(4)->ip('appIP', '应用IP');
+            $row->date('maintaindate', '维保日期')->default(date('Y-m-d'));
             $row->datetime('updatetime', '更新日期')->default(date('Y-m-d H:i:s'));
             $row->width(4)->text('hostname', '主机名');
             $row->width(4)->text('project', '所属项目');
-            $row->width(4)->text('level', '设备等级');
+            
             $row->width(4)->hidden('statusofrecord')->value(0);
             // $row->html('<h4>添加私有屬性</h4>');
             // $row->text('extend1', 'Extend1');
@@ -217,7 +258,7 @@ class NetDeviceController extends Controller
         }, $form);
 
 
-        \Log::info('------创建设备表单---------'); 
+        \Log::info('------创建设备表单---------');
         return $form;
 
 /**

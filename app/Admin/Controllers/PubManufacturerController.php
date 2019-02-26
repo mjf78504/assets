@@ -2,7 +2,7 @@
 
 namespace App\Admin\Controllers;
 
-use App\Models\PubContract;
+use App\Models\PubManufacturer;
 use App\Models\PubCategory;
 
 use App\Http\Controllers\Controller;
@@ -12,7 +12,7 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
 
-class PubContractController extends Controller
+class PubManufacturerController extends Controller
 {
     use HasResourceActions;
 
@@ -81,18 +81,20 @@ class PubContractController extends Controller
      */
     protected function grid()
     {
-        $grid = new Grid(new PubContract);
+        $grid = new Grid(new PubManufacturer);
 
         $grid->id('Id');
-        $grid->created_at('Created at');
-        $grid->updated_at('Updated at');
+        $grid->nickname('Nickname');
         $grid->name('Name');
-        $grid->operator('Operator');
+        $grid->type('Type');
+        $grid->leader('Leader');
+        $grid->linkman('Linkman');
         $grid->description('Description');
-        $grid->local('Local');
-        $grid->status('Status');
-        $grid->startdate('Startdate');
-        $grid->enddate('Enddate');
+        $grid->personscount('Personscount');
+        $grid->persons('Persons');
+        $grid->extend1('Extend1');
+        // $grid->created_at('Created at');
+        $grid->updated_at('Updated at');
 
         return $grid;
     }
@@ -105,18 +107,19 @@ class PubContractController extends Controller
      */
     protected function detail($id)
     {
-        $show = new Show(PubContract::findOrFail($id));
+        $show = new Show(PubManufacturer::findOrFail($id));
 
         $show->id('Id');
+        $show->name('Name');
+        $show->type('Type');
+        $show->leader('Leader');
+        $show->linkman('Linkman');
+        $show->description('Description');
+        $show->personscount('Personscount');
+        $show->persons('Persons');
+        $show->extend1('Extend1');
         $show->created_at('Created at');
         $show->updated_at('Updated at');
-        $show->name('Name');
-        $show->operator('Operator');
-        $show->description('Description');
-        $show->local('Local');
-        $show->status('Status');
-        $show->startdate('Startdate');
-        $show->enddate('Enddate');
 
         return $show;
     }
@@ -129,22 +132,24 @@ class PubContractController extends Controller
     protected function form()
     {
         /** 获取分类信息*/
-        $categories = PubCategory::where('parent_id', 34)->get();
+        $categories = PubCategory::where('parent_id', 29)->get();
         // 生成类别数组
         $arr1 = [];
         foreach ($categories as $category) {
                 $arr1 = array_add($arr1, $category->id, $category->name);
         };
 
-        $form = new Form(new PubContract);
+        $form = new Form(new PubManufacturer);
 
-        $form->text('name', '合同名称');
-        $form->text('operator', '签订人');
-        $form->text('description', '合同描述');
-        $form->text('local', '存放位置');
-        $form->select('status', '状态')->options($arr1);
-        $form->datetime('startdate', '生效日期')->default(date('Y-m-d H:i:s'));
-        $form->datetime('enddate', '结束日期')->default(date('Y-m-d H:i:s'));
+        $form->text('name', '单位名称');
+        $form->text('nickname', '单位简称');
+        $form->select('type', '厂商类别')->options($arr1);
+        $form->text('leader', '负责人');
+        $form->mobile('linkman', '联系方式')->options(['mask' => '999 9999 9999']);
+        $form->number('personscount', '参与人数');
+        $form->textarea('persons', '参与人信息');
+        $form->textarea('description', '描述说明');
+        // $form->text('extend1', 'Extend1');
 
         return $form;
     }

@@ -83,7 +83,7 @@ class PubCategoryController extends Controller
 
         $grid->id('Id');
         // $grid->parent_id('Parent id');
-        $grid->parent_id('类别')->display(function ($id) {
+        $grid->parent_id('父类')->display(function ($id) {
             if($id == 0) {
                 return 'Root';
             }else {

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Routing\Router;
+use App\Models\PubCategory;
+use App\Http\Resources\PubCategory as PubCategoryResource;
 
 Admin::registerAuthRoutes();
 
@@ -11,10 +13,8 @@ Route::group([
 ], function (Router $router) {
 
     $router->get('/', 'HomeController@index');
-    // 资产（网络）设备路由
-    $router->resource('network', 'NetDeviceController');
-    $router->post('network', 'NetDeviceController@store')->name('users.store');
 
+    $router->resource('network', 'NetDeviceController');
     $router->resource('category', 'PubCategoryController');
     $router->resource('operflow', 'PubOperflowController');
     $router->resource('property', 'PubPropertyController');
@@ -22,4 +22,10 @@ Route::group([
     $router->resource('address', 'PubAddressController');
     $router->resource('cabinet', 'PubCabinetController');
     $router->resource('contract', 'PubContractController');
+    $router->resource('manufacturer', 'PubManufacturerController');
+
+    // 接口
+    $router->get('api/category', function () {
+        return new PubCategoryResource(PubCategory::all());
+    });
 });

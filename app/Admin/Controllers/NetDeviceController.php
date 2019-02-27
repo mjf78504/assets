@@ -15,6 +15,9 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
 use Encore\Admin\Layout\Row;
+use Encore\Admin\Widgets\Tab;
+use Encore\Admin\Widgets\Table;
+use Encore\Admin\Widgets\Form as Formm;
 
 class NetDeviceController extends Controller
 {
@@ -44,8 +47,8 @@ class NetDeviceController extends Controller
     public function show($id, Content $content)
     {
         return $content
-            ->header('Detail')
-            ->description('description')
+            ->header('详情')
+            ->description('设备关联信息')
             ->body($this->detail($id));
     }
 
@@ -106,7 +109,7 @@ class NetDeviceController extends Controller
         $grid->devicetype('型号');
         $grid->producer('制造商');
         $grid->location('位置');
-        $grid->description('描述');
+        // $grid->description('描述');
         $grid->status('运行状态');
         //$grid->supplier('供货商');
         // $grid->contractprice('合同价格');
@@ -133,6 +136,36 @@ class NetDeviceController extends Controller
      */
     protected function detail($id)
     {
+        
+/** 使用Tab的方式，不方便排列表单 */
+        $netdevice = NetDevice::findOrFail($id);
+        $netdevices = array_only($netdevice->toArray(), [ 'id', 'category', 'name', 'type', 'devicetype', 'level', 'location', 'description', 'producer', 'supplier', 'contractNo', 'status', 'manageIP', 'appIP', 'maintaindate', 'updatetime', 'hostname', 'project']);
+        $columns1 = [];
+        $columns1 = array_add($columns1, 'ID', $netdevices['id']);
+        $columns1 = array_add($columns1, '设备种类', PubCategory::findOrFail($netdevices['category'])->name);
+        $columns1 = array_add($columns1, '设备名称', $netdevices['name']);
+        $columns2 = array_only($netdevice->toArray(), [ 'description']);
+        $data = [
+            'columns1' => $columns1,
+            'columns2' => $columns2,
+            'escape'    => true,
+            'label'     => '基础信息',
+            'wrapped'   => true,
+            'title' => '新标题',
+            'style' => 'info',
+            'tools' => '工具处'
+        ];
+        $tab = new Tab();
+        $tab->add('基础信息', view('showw.default', $data));
+        $tab->add('私有属性', '用Grid表格展示吧');
+        $tab->add('合同信息', $id. '--' . '用hasMany展示吧');
+        $tab->add('厂商信息', new Table());
+        $tab->add('项目信息', '这里展示与项目相关的信息。');
+        $tab->add('操作记录', '这里是关于这个设备的所有操作记录');
+
+        return $tab;
+
+/**
         // 尝试查询
         $a = NetDevice::findOrFail($id);
         $b = PubProperty::findOrFail(1);
@@ -143,9 +176,12 @@ class NetDeviceController extends Controller
             $properties->proname('属性名称');
             $properties->provalue('属性值');
         });
+
+*/
         // $show->proname('属性名称');
         // $show->provalue('属性值');
-        /** 
+
+/** 这里是原版的东西 
         $show = new Show(NetDevice::findOrFail($id));
 
         $show->id('Id');
@@ -173,8 +209,9 @@ class NetDeviceController extends Controller
         $show->statusofrecord('Statusofrecord');
         $show->extend1('Extend1');
         $show->extend2('Extend2');
-*/
+        
         return $show;
+*/
     }
 
     /**

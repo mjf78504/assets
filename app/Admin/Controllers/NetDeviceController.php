@@ -10,6 +10,8 @@ use App\Models\PubContract;
 
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\HasResourceActions;
+
+use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
@@ -32,8 +34,9 @@ class NetDeviceController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header('Index')
-            ->description('description')
+            ->header('资产')
+            ->description('设备列表')
+            ->breadcrumb(['text' => '资产列表', 'url' => '/network'])
             ->body($this->grid());
     }
 
@@ -49,6 +52,9 @@ class NetDeviceController extends Controller
         return $content
             ->header('详情')
             ->description('设备关联信息')
+            ->breadcrumb(
+                ['text' => '资产列表', 'url' => '/network'],
+                ['text' => '资产详情'])
             ->body($this->detail($id));
     }
 
@@ -99,21 +105,34 @@ class NetDeviceController extends Controller
 
         $grid->id('设备编号')->display(function($id) {
             return 'NET' . str_pad($id, 8, '0', STR_PAD_LEFT);
-        });
+        })->sortable();
         // $grid->created_at('Created at');
         // $grid->updated_at('Updated at');
-        $grid->category('种类');
+        $grid->category('分组')->display(function($category){
+            return PubCategory::findOrFail($category)->name;
+        })->sortable();
         $grid->SN('SN');
-        $grid->name('名称');
-        $grid->type('类型');
+        $grid->name('名称')->sortable()->limit(18);
+        $grid->type('类型')->display(function($type) {
+            return PubCategory::find($type)->name;
+        });
         $grid->devicetype('型号');
-        $grid->producer('制造商');
-        $grid->location('位置');
+        $grid->producer('制造商')->display(function($producer) {
+            return PubManufacturer::find($producer)->nickname;
+        });
+        $grid->location('位置')->limit(18);
         // $grid->description('描述');
-        $grid->status('运行状态');
+        $grid->status('运行状态')->display(function($status) {
+            $a = PubCategory::find($status)->name;
+            if ($status == 39) {
+                return "<span style='color:green; font-weight:bold'>$a</span>";
+            }else {
+                return "<span style='color:red; font-weight:bold'>$a</span>";
+            }
+        });
         //$grid->supplier('供货商');
         // $grid->contractprice('合同价格');
-        $grid->contractNo('合同编号');
+        // $grid->contractNo('合同编号');
         $grid->maintaindate('维保');
         //$grid->manageIP('管理IP');
         //$grid->appIP('应用IP');
@@ -124,6 +143,31 @@ class NetDeviceController extends Controller
         // $grid->statusofrecord('记录状态');
         // $grid->extend1('Extend1');
         // $grid->extend2('Extend2');
+
+        /** 过滤器设置 */
+        $grid->filter(function($filter){
+            // 去掉默认的id过滤器
+            $filter->disableIdFilter();
+
+            // 下拉过滤菜单
+            $filter->scope('a', '网络类')->where('category', 17);
+            $filter->scope('b', '系统类')->where('category', 16);
+            $filter->scope('c', '安全类')->where('category', 18);
+            $filter->scope('d', '办公')->where('category', 19);
+
+            $filter->column(6, function ($filter) {
+                // 在这里添加第一列字段过滤器
+                $filter->like('id', '设备编号')->placeholder('输入编号中的数字。。。');
+                $filter->like('name', '设备名称')->placeholder('模糊搜索。。。');
+                $filter->like('SN', 'SN')->placeholder('模糊搜索。。。');
+            });
+            $filter->column(6, function ($filter) {
+
+                $filter->equal('category', '分组')->select(['16' => '系统', '17' => '网络', '18' => '安全', '19' => '办公', '20' => '其他']);
+                $filter->equal('type', '类型')->select(['21' => '服务器', '22' => '交换机', '23' => 'waf', '41' => '笔记本']);
+                $filter->equal('status', '状态')->select(['39' => '运行', '40' => '停机']);
+            });
+        });
 
         return $grid;
     }
@@ -137,29 +181,91 @@ class NetDeviceController extends Controller
     protected function detail($id)
     {
         
-/** 使用Tab的方式，不方便排列表单 */
+        /** 使用Tab的方式 */
+        $tab = new Tab();
+
+        /** tab:基础信息-开始 */
         $netdevice = NetDevice::findOrFail($id);
         $netdevices = array_only($netdevice->toArray(), [ 'id', 'category', 'name', 'type', 'devicetype', 'level', 'location', 'description', 'producer', 'supplier', 'contractNo', 'status', 'manageIP', 'appIP', 'maintaindate', 'updatetime', 'hostname', 'project']);
         $columns1 = [];
-        $columns1 = array_add($columns1, 'ID', $netdevices['id']);
-        $columns1 = array_add($columns1, '设备种类', PubCategory::findOrFail($netdevices['category'])->name);
-        $columns1 = array_add($columns1, '设备名称', $netdevices['name']);
-        $columns2 = array_only($netdevice->toArray(), [ 'description']);
+        $columns1 = array_add($columns1, '设备编号', 'NET' . str_pad($netdevices['id'], 8, '0', STR_PAD_LEFT));
+        $columns1 = array_add($columns1, '设备分组', PubCategory::findOrFail($netdevices['category'])->name);
+        $columns1 = array_add($columns1, '设备类型', PubCategory::findOrFail($netdevices['type'])->name);
+        $columns1 = array_add($columns1, '设备型号', $netdevices['devicetype']);
+        $columns1 = array_add($columns1, '设备等级', PubCategory::findOrFail($netdevices['level'])->name);
+        $columns1 = array_add($columns1, '设备位置', $netdevices['location']);
+        $columns1 = array_add($columns1, '设备描述', $netdevices['description']);
+        $columns1 = array_add($columns1, '制造商', PubManufacturer::findOrFail($netdevices['producer'])->name);
+        $columns1 = array_add($columns1, '供货商', PubManufacturer::findOrFail($netdevices['supplier'])->name);
+
+        $columns2 = [];
+        $columns2 = array_add($columns2, '合同', PubContract::findOrFail($netdevices['contractNo'])->name);
+        $columns2 = array_add($columns2, '运行状态', PubCategory::findOrFail($netdevices['status'])->name);
+        $columns2 = array_add($columns2, '管理IP', $netdevices['manageIP']);
+        $columns2 = array_add($columns2, '应用IP', $netdevices['appIP']);
+        $columns2 = array_add($columns2, '维保日期', $netdevices['maintaindate']);
+        $columns2 = array_add($columns2, '更新日期', $netdevices['updatetime']);
+        $columns2 = array_add($columns2, '主机名', $netdevices['hostname']);
+        $columns2 = array_add($columns2, '所属项目', $netdevices['project']);
         $data = [
             'columns1' => $columns1,
             'columns2' => $columns2,
             'escape'    => true,
-            'label'     => '基础信息',
             'wrapped'   => true,
             'title' => '新标题',
             'style' => 'info',
-            'tools' => '工具处'
+            'tools' => '工具栏'
         ];
-        $tab = new Tab();
+        
         $tab->add('基础信息', view('showw.default', $data));
-        $tab->add('私有属性', '用Grid表格展示吧');
-        $tab->add('合同信息', $id. '--' . '用hasMany展示吧');
-        $tab->add('厂商信息', new Table());
+        /** tab:基础信息-结束 */
+    
+        /** tab:配置信息-开始 */
+        $grid = new Grid(new PubProperty);
+        $grid->model()->where('net_devices_id', '=', $id); // 修改模型数据来源
+        $grid->disablePagination(); // 禁用分页
+        $grid->disableFilter(); // 禁用查询过滤器
+        $grid->disableCreateButton(); // 禁用创建按钮
+        $grid->disableExport(); // 禁用导出
+        $grid->disableRowSelector();  // 禁用行选择
+        $grid->disableActions(); // 禁用行操作列
+        // $grid->perPages([10, 20, 30, 40, 50]);  // 设置分页选择
+        // $grid->id('属性编号');
+        $grid->proname('属性名称');
+        $grid->provalue('属性值');
+        $grid->prodesc('属性说明');
+        $grid->updated_at('最后更新');
+
+        $tab->add('配置信息', $grid->render());
+        /** tab:配置信息-结束 */
+
+        /** tab:合同信息-开始 */
+        $contract = PubContract::find($netdevices['contractNo']);
+        $show = new Show($contract);
+        $show->panel()->style('default')->title(' '); // 设置面板样式
+        $show->panel()->tools(function ($tools) {   // 设置工具栏
+            $tools->disableEdit();   // 禁用编辑
+            $tools->disableList();   // 禁用列表
+            $tools->disableDelete(); // 禁用删除
+        });;
+
+        $show->id('序号')->link();
+        $show->name('合同名称');
+        $show->operator('经办人');
+        $show->description('合同概述');
+        $show->local('存放位置');
+        $show->status('状态')->as(function($statusId) {
+            $status = PubCategory::find($statusId)->name;
+            return $status;
+        })->label();
+        $show->startdate('生效时间');
+        $show->enddate('失效时间');
+
+        $tab->add('合同信息', $show->render());
+        /** tab:合同信息-结束 */
+
+
+        // $tab->add('厂商信息', new Table());
         $tab->add('项目信息', '这里展示与项目相关的信息。');
         $tab->add('操作记录', '这里是关于这个设备的所有操作记录');
 
@@ -238,6 +344,7 @@ class NetDeviceController extends Controller
             $arr4 = [];
             $arr5 = [];
             $arr6 = [];
+            $arr7 = [];
             foreach ($categories as $category) {
                 if ($category->parent_id == 4) {
                     $arr1 = array_add($arr1, $category->id, $category->name);
@@ -245,6 +352,8 @@ class NetDeviceController extends Controller
                     $arr2 = array_add($arr2, $category->id, $category->name);
                 }else if ($category->parent_id == 24) {
                     $arr3 = array_add($arr3, $category->id, $category->name);
+                }else if ($category->parent_id == 38) {
+                    $arr7 = array_add($arr7, $category->id, $category->name);
                 }
             };
 
@@ -253,15 +362,15 @@ class NetDeviceController extends Controller
                 $arr5 = array_add($arr5, $manufacturer->id, $manufacturer->nickname);
             };
 
-            // 生成合同数组
+            // 生成合同数组  
             foreach($contracts as $contract) {
                 $arr4 = array_add($arr4, $contract->id, $contract->name);
             };
             
-            $row->width(4)->select('category', '设备种类')->options($arr1);
+            $row->width(4)->select('category', '设备分组')->options($arr1)->rules('required');
             $row->width(4)->text('name', '设备名称')->rules('required|min:2');
             $row->width(4)->text('SN', 'SN')->rules('required|min:3');          
-            $row->width(4)->select('type', '设备类型')->options($arr2);
+            $row->width(4)->select('type', '设备类型')->options($arr2)->rules('required');
             $row->width(4)->text('devicetype', '设备型号');
             $row->width(4)->select('level', '设备等级')->options($arr3);
             $row->width(4)->text('location', '设备位置');
@@ -270,7 +379,7 @@ class NetDeviceController extends Controller
             $row->width(4)->select('supplier', '供货商')->options($arr5);
             // $row->decimal('contractprice', '合同价格');
             $row->width(4)->select('contractNo', '合同')->options($arr4);
-            $row->width(4)->select('status', '运行状态')->options(['0' => '启动', '1' => '停止']);
+            $row->width(4)->select('status', '运行状态')->options($arr7);
             $row->width(4)->ip('manageIP', '管理IP');
             $row->width(4)->ip('appIP', '应用IP');
             $row->date('maintaindate', '维保日期')->default(date('Y-m-d'));

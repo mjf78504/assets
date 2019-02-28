@@ -8,11 +8,16 @@ use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
+use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
+// 用于模型树
+use Encore\Admin\Facades\Admin;
+// use Encore\Admin\Controllers\ModelForm;
 
 class PubCategoryController extends Controller
 {
     use HasResourceActions;
+    // use ModelForm;
 
     /**
      * Index interface.
@@ -25,7 +30,11 @@ class PubCategoryController extends Controller
         return $content
             ->header('类别列表')
             ->description('配置系统用到的各种类别')
-            ->body($this->grid());
+            ->row(function(Row $row) {
+                $row->column(4, $this->tree());
+                $row->column(8, $this->grid());
+            });
+
     }
 
     /**
@@ -73,6 +82,18 @@ class PubCategoryController extends Controller
     }
 
     /**
+     * show tree.  模型树
+     *
+     * @param Content $content
+     * @return Content
+     */
+    public function tree()
+    {
+        return PubCategory::tree();
+    }
+
+
+    /**
      * Make a grid builder.
      *
      * @return Grid
@@ -80,14 +101,18 @@ class PubCategoryController extends Controller
     protected function grid()
     {
         $grid = new Grid(new PubCategory);
+        $grid->model()->where('parent_id', '!=', '99999');
+        $grid->model()->orderBy('parent_id', 'asc');
+        $grid->model()->orderBy('id', 'asc');
+        // $grid->model()->orderBy('id', 'desc');
 
         $grid->id('Id');
         // $grid->parent_id('Parent id');
-        $grid->parent_id('父类')->display(function ($id) {
-            if($id == 0) {
-                return 'Root';
+        $grid->parent_id('父类')->display(function ($parent_id) {
+            if($parent_id == 0) {
+                return '0-Root';
             }else {
-                return PubCategory::findOrFail($id)->name;
+                return $parent_id . '-' . PubCategory::findOrFail($parent_id)->name;
             }
         });
         $grid->name('属性');
@@ -142,6 +167,7 @@ class PubCategoryController extends Controller
         $form->select('parent_id', '类别')->options($arr);
         $form->text('name', '属性');
         // $form->text('description', 'Description');
+        $form->select('sort', '排序')->options([1=>'1',2=>'2',3=>'3',4=>'4',5=>'5',6=>'6',7=>'7',8=>'8',9=>'9']);
         $form->textarea('description', '描述');
 
         return $form;

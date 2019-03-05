@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Models\PubContract;
 use App\Models\PubCategory;
+use App\Models\pubAddress;
 
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\HasResourceActions;
@@ -11,6 +12,8 @@ use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Show;
+
+use App\Helpers\Helperr;
 
 class PubContractController extends Controller
 {
@@ -25,8 +28,8 @@ class PubContractController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header('Index')
-            ->description('description')
+            ->header('合同管理')
+            ->description(' ')
             ->body($this->grid());
     }
 
@@ -40,8 +43,8 @@ class PubContractController extends Controller
     public function show($id, Content $content)
     {
         return $content
-            ->header('Detail')
-            ->description('description')
+            ->header('合同管理')
+            ->description(' ')
             ->body($this->detail($id));
     }
 
@@ -55,8 +58,8 @@ class PubContractController extends Controller
     public function edit($id, Content $content)
     {
         return $content
-            ->header('Edit')
-            ->description('description')
+            ->header('合同管理')
+            ->description(' ')
             ->body($this->form()->edit($id));
     }
 
@@ -69,8 +72,8 @@ class PubContractController extends Controller
     public function create(Content $content)
     {
         return $content
-            ->header('Create')
-            ->description('description')
+            ->header('合同管理')
+            ->description(' ')
             ->body($this->form());
     }
 
@@ -83,16 +86,21 @@ class PubContractController extends Controller
     {
         $grid = new Grid(new PubContract);
 
-        $grid->id('Id');
-        $grid->created_at('Created at');
-        $grid->updated_at('Updated at');
-        $grid->name('Name');
-        $grid->operator('Operator');
-        $grid->description('Description');
-        $grid->local('Local');
-        $grid->status('Status');
-        $grid->startdate('Startdate');
-        $grid->enddate('Enddate');
+        $grid->id('序号');
+        // $grid->created_at('创建时间');
+        // $grid->updated_at('更新时间');
+        $grid->name('合同名称');
+        $grid->operator('经办人');
+        $grid->description('合同概述')->limit(36);
+        $grid->local('存放位置')->display(function($local) {
+            $address = pubAddress::find($local);
+            return $address ? $address->alll : $local;
+        });
+        $grid->status('合同状态')->display(function($status) {
+            return PubCategory::find($status)->name;
+        });
+        $grid->startdate('生效时间');
+        $grid->enddate('失效时间');
 
         return $grid;
     }
@@ -107,16 +115,21 @@ class PubContractController extends Controller
     {
         $show = new Show(PubContract::findOrFail($id));
 
-        $show->id('Id');
-        $show->created_at('Created at');
-        $show->updated_at('Updated at');
-        $show->name('Name');
-        $show->operator('Operator');
-        $show->description('Description');
-        $show->local('Local');
-        $show->status('Status');
-        $show->startdate('Startdate');
-        $show->enddate('Enddate');
+        $show->id('序号');
+        $show->name('合同名称');
+        $show->operator('经办人');
+        $show->description('合同概述');
+        $show->local('存放位置')->as(function($local) {
+            $address = pubAddress::find($local);
+            return $address ? $address->alll : $local;
+        });
+        $show->status('合同状态')->as(function($status) {
+            return PubCategory::find($status)->name;
+        });
+        $show->startdate('生效时间');
+        $show->enddate('失效时间');
+        $show->created_at('创建时间');
+        $show->updated_at('更新时间');
 
         return $show;
     }
@@ -128,21 +141,13 @@ class PubContractController extends Controller
      */
     protected function form()
     {
-        /** 获取分类信息*/
-        $categories = PubCategory::where('parent_id', 34)->get();
-        // 生成类别数组
-        $arr1 = [];
-        foreach ($categories as $category) {
-                $arr1 = array_add($arr1, $category->id, $category->name);
-        };
-
         $form = new Form(new PubContract);
 
         $form->text('name', '合同名称');
-        $form->text('operator', '签订人');
+        $form->text('operator', '经办人');
         $form->text('description', '合同描述');
-        $form->text('local', '存放位置');
-        $form->select('status', '状态')->options($arr1);
+        $form->select('local', '存放位置')->options(Helperr::selectt(0, 'pub_address'));
+        $form->select('status', '状态')->options(Helperr::selectt(34));
         $form->datetime('startdate', '生效日期')->default(date('Y-m-d H:i:s'));
         $form->datetime('enddate', '结束日期')->default(date('Y-m-d H:i:s'));
 

@@ -120,6 +120,10 @@ class PubCategoryController extends Controller
         // $grid->created_at('创建时间');
         $grid->updated_at('最后更新');
 
+        /** 分页设置 */
+        // $grid->perPages([100, 200]);
+        $grid->paginate(100);
+
         return $grid;
     }
 

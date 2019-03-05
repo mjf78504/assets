@@ -17,6 +17,9 @@ class PubCategory extends Model
      */
     protected $table = 'pub_category';
 
+    // laravel 访问器
+    protected $appends = ['category'];
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
@@ -24,5 +27,9 @@ class PubCategory extends Model
         $this->setParentColumn('parent_id');
         $this->setOrderColumn('sort');
         $this->setTitleColumn('name');
+    }
+
+    public function getCategoryAttribute() {
+        return '分类名称是：'.$this->name;
     }
 }

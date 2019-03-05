@@ -17,6 +17,7 @@ class CreatePubCategoryTable extends Migration
             $table->increments('id');
             $table->timestamps();
             $table->integer('parent_id');
+            $table->integer('sort');
             $table->string('name', 32);
             $table->string('description', 100);
         });

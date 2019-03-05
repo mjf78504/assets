@@ -22,6 +22,7 @@ class CreatePubContractsTable extends Migration
             $table->string('description', 320);
             $table->string('local', 160);
             $table->string('status', 16);
+            $table->string('price', 32);
             $table->datetime('startdate');
             $table->datetime('enddate');
         });

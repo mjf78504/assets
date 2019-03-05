@@ -22,7 +22,7 @@ return [
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<b>Assets</b> admin',
+    'logo' => '<b>柳州银行</b> 资产管理系统',
 
     /*
     |--------------------------------------------------------------------------
@@ -34,7 +34,7 @@ return [
     | '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo-mini' => '<b>Ass</b>',
+    'logo-mini' => '<b>Asset</b>',
 
     /*
     |--------------------------------------------------------------------------

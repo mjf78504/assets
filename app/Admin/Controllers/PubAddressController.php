@@ -3,6 +3,10 @@
 namespace App\Admin\Controllers;
 
 use App\Models\PubAddress;
+use App\Models\PubCategory;
+use App\Models\NetDevice;
+use App\Models\PubCabinet;
+
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\HasResourceActions;
 use Encore\Admin\Form;
@@ -23,8 +27,8 @@ class PubAddressController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header('Index')
-            ->description('description')
+            ->header('地址管理')
+            ->description('所有地址列表')
             ->body($this->grid());
     }
 
@@ -38,8 +42,8 @@ class PubAddressController extends Controller
     public function show($id, Content $content)
     {
         return $content
-            ->header('Detail')
-            ->description('description')
+            ->header('地址详情')
+            ->description('')
             ->body($this->detail($id));
     }
 
@@ -53,8 +57,8 @@ class PubAddressController extends Controller
     public function edit($id, Content $content)
     {
         return $content
-            ->header('Edit')
-            ->description('description')
+            ->header('编辑')
+            ->description('地址信息')
             ->body($this->form()->edit($id));
     }
 
@@ -67,9 +71,29 @@ class PubAddressController extends Controller
     public function create(Content $content)
     {
         return $content
-            ->header('Create')
-            ->description('description')
+            ->header('创建')
+            ->description('具体地址')
             ->body($this->form());
+    }
+
+    /** 获取下拉框所属分类的函数 */
+    public function getcategories($id) {
+        $categories = PubCategory::where('parent_id', $id)->get();
+        $arr = [];
+        foreach ($categories as $category) {
+            $arr = array_add($arr, $category->id, $category->name);
+        }
+        return $arr;
+    }
+
+    /** 获取机柜列表all */
+    public function getcabinet($id) {  // 注意：
+        $categories = NetDevice::where('type', $id)->get();
+        $arr = [];
+        foreach ($categories as $category) {
+            $arr = array_add($arr, $category->id, $category->name);
+        }
+        return $arr;
     }
 
     /**
@@ -81,14 +105,29 @@ class PubAddressController extends Controller
     {
         $grid = new Grid(new PubAddress);
 
-        $grid->id('Id');
-        $grid->created_at('Created at');
-        $grid->updated_at('Updated at');
-        $grid->location('Location');
-        $grid->position('Position');
-        $grid->cabinet('Cabinet');
-        $grid->detail('Detail');
-        $grid->description('Description');
+        $grid->id('序号');
+        /**
+        $grid->column('abc', '详细地址')->display(function(){
+            return $this->id . '-' . $this->detail;
+        });
+        */
+        $grid->alll('详细地址');
+        // $grid->created_at('创建时间');
+        $grid->location('机房位置')->display(function($location) {
+            $local =PubCategory::find($location);
+            return $local ? $local->name : '无';
+        });
+        $grid->position('设备位置')->display(function($position) {
+            $posi = PubCategory::find($position);
+            return $posi ? $posi->name : '无';
+        });
+        $grid->cabinet('机柜')->display(function($cabinet) {
+            $cab = NetDevice::find($cabinet);
+            return $cab ? $cab->name : '无';
+        });
+        $grid->detail('更多');
+        // $grid->description('地址说明');
+        $grid->updated_at('最后更新');
 
         return $grid;
     }
@@ -103,14 +142,24 @@ class PubAddressController extends Controller
     {
         $show = new Show(PubAddress::findOrFail($id));
 
-        $show->id('Id');
-        $show->created_at('Created at');
-        $show->updated_at('Updated at');
-        $show->location('Location');
-        $show->position('Position');
-        $show->cabinet('Cabinet');
-        $show->detail('Detail');
-        $show->description('Description');
+        $show->id('序号');
+        $show->alll('详细地址');
+        $show->location('机房位置')->as(function($local) {
+            $local =PubCategory::find($local);
+            return $local ? $local->name : '无';
+        });
+        $show->position('设备位置')->as(function($position) {
+            $posi = PubCategory::find($position);
+            return $posi ? $posi->name : '无';
+        });
+        $show->cabinet('机柜')->as(function($cabinet) {
+            $cab = NetDevice::find($cabinet);
+            return $cab ? $cab->name : '无';
+        });
+        $show->detail('更多');
+        $show->description('地址描述');
+        $show->created_at('创建时间');
+        $show->updated_at('更新时间');
 
         return $show;
     }
@@ -124,11 +173,11 @@ class PubAddressController extends Controller
     {
         $form = new Form(new PubAddress);
 
-        $form->number('location', 'Location');
-        $form->number('position', 'Position');
-        $form->number('cabinet', 'Cabinet');
-        $form->text('detail', 'Detail');
-        $form->text('description', 'Description');
+        $form->select('location', '机房位置')->options($this->getcategories(2));
+        $form->select('position', '设备位置')->options($this->getcategories(3));
+        $form->select('cabinet', '机柜')->options($this->getcabinet(54));
+        $form->text('detail', '更多')->rules('required');
+        $form->textarea('description', '地址说明');
 
         return $form;
     }

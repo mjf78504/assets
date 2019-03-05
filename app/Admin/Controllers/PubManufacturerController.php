@@ -25,8 +25,8 @@ class PubManufacturerController extends Controller
     public function index(Content $content)
     {
         return $content
-            ->header('Index')
-            ->description('description')
+            ->header('厂商列表')
+            ->description('厂商信息展示')
             ->body($this->grid());
     }
 
@@ -40,8 +40,8 @@ class PubManufacturerController extends Controller
     public function show($id, Content $content)
     {
         return $content
-            ->header('Detail')
-            ->description('description')
+            ->header('厂商')
+            ->description('详情信息')
             ->body($this->detail($id));
     }
 
@@ -55,8 +55,8 @@ class PubManufacturerController extends Controller
     public function edit($id, Content $content)
     {
         return $content
-            ->header('Edit')
-            ->description('description')
+            ->header('编辑')
+            ->description('')
             ->body($this->form()->edit($id));
     }
 
@@ -69,8 +69,8 @@ class PubManufacturerController extends Controller
     public function create(Content $content)
     {
         return $content
-            ->header('Create')
-            ->description('description')
+            ->header('创建')
+            ->description('新增厂商')
             ->body($this->form());
     }
 
@@ -83,18 +83,20 @@ class PubManufacturerController extends Controller
     {
         $grid = new Grid(new PubManufacturer);
 
-        $grid->id('Id');
-        $grid->nickname('Nickname');
-        $grid->name('Name');
-        $grid->type('Type');
-        $grid->leader('Leader');
-        $grid->linkman('Linkman');
-        $grid->description('Description');
-        $grid->personscount('Personscount');
-        $grid->persons('Persons');
-        $grid->extend1('Extend1');
+        $grid->id('序号');
+        $grid->nickname('简称');
+        $grid->name('全称');
+        $grid->type('类型')->display(function($type) {
+            return PubCategory::find($type)->name;
+        });
+        $grid->leader('负责人');
+        $grid->linkman('联系方式');
+        // $grid->description('Description')->limit(24);
+        $grid->personscount('参与人数');
+        // $grid->persons('Persons');
+        // $grid->extend1('Extend1');
         // $grid->created_at('Created at');
-        $grid->updated_at('Updated at');
+        $grid->updated_at('最后更新');
 
         return $grid;
     }
@@ -109,17 +111,18 @@ class PubManufacturerController extends Controller
     {
         $show = new Show(PubManufacturer::findOrFail($id));
 
-        $show->id('Id');
-        $show->name('Name');
-        $show->type('Type');
-        $show->leader('Leader');
-        $show->linkman('Linkman');
-        $show->description('Description');
-        $show->personscount('Personscount');
-        $show->persons('Persons');
-        $show->extend1('Extend1');
-        $show->created_at('Created at');
-        $show->updated_at('Updated at');
+        $show->id('序号');
+        $show->nickname('简称');
+        $show->name('全称');
+        $show->type('厂商类型');
+        $show->leader('负责人');
+        $show->linkman('联系方式');
+        $show->description('说明');
+        $show->personscount('参与人数');
+        $show->persons('参与人');
+        // $show->extend1('Extend1');
+        // $show->created_at('Created at');
+        $show->updated_at('最后更新');
 
         return $show;
     }

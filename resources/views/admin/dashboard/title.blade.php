@@ -26,10 +26,12 @@
 </style>
 
 <div class="title">
-    Laravel-admin
+    资产管理系统
 </div>
 <div class="links">
-    <a href="https://github.com/z-song/laravel-admin" target="_blank">Github</a>
-    <a href="http://laravel-admin.org/docs"  target="_blank">Documentation</a>
-    <a href="http://laravel-admin.org/demo"  target="_blank">Demo</a>
+    <a href="network?&_scope_=b">系统</a>
+    <a href="network?&_scope_=a">网络</a>
+    <a href="network?&_scope_=c">安全</a>
+    <a href="network?&_scope_=d">办公</a>
+    <!--   target="_blank" -->
 </div>

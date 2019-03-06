@@ -1,6 +1,6 @@
 <!-- Main Footer -->
 <footer class="main-footer">
-    <!-- To the right -->
+<!-- To the right 
     <div class="pull-right hidden-xs">
         @if(config('admin.show_environment'))
             <strong>Env</strong>&nbsp;&nbsp; {!! env('APP_ENV') !!}
@@ -13,6 +13,7 @@
         @endif
 
     </div>
+-->
     <!-- Default to the left -->
-    <strong>Powered by <a href="https://github.com/z-song/laravel-admin" target="_blank">laravel-admin</a></strong>
+    <strong>Powered by <a href="http://www.bolz.cn" target="_blank">www.bolz.cn</a></strong>
 </footer>

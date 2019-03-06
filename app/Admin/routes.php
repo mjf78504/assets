@@ -12,7 +12,7 @@ Route::group([
     'middleware'    => config('admin.route.middleware'),
 ], function (Router $router) {
 
-    $router->get('/', 'HomeController@index');
+    $router->get('/', 'NewHomeController@index');
 
     $router->resource('network', 'NetDeviceController');
     $router->resource('category', 'PubCategoryController');
@@ -23,6 +23,7 @@ Route::group([
     $router->resource('cabinet', 'PubCabinetController');
     $router->resource('contract', 'PubContractController');
     $router->resource('manufacturer', 'PubManufacturerController');
+    $router->resource('project', 'PubProjectController');
 
     // 接口
     $router->get('api/category', function () {

@@ -8,6 +8,7 @@ use App\Models\PubCategory;
 use App\Models\PubManufacturer;
 use App\Models\PubContract;
 use App\Models\PubAddress;
+use App\Models\PubProject;
 
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\HasResourceActions;
@@ -108,7 +109,7 @@ class NetDeviceController extends Controller
         $grid = new Grid(new NetDevice);
 
         $grid->id('设备编号')->display(function($id) {
-            return '<a href="network/' . $id . '">' . 'NET' . str_pad($id, 8, '0', STR_PAD_LEFT). '</a>';
+            return '<a href="network/' . $id . '">' . str_pad($id, 8, '0', STR_PAD_LEFT). '</a>';
         })->sortable();
         // $grid->created_at('Created at');
         // $grid->updated_at('Updated at');
@@ -124,7 +125,10 @@ class NetDeviceController extends Controller
         $grid->producer('制造商')->display(function($producer) {
             return PubManufacturer::find($producer)->nickname;
         });
-        $grid->location('位置')->limit(18);
+        $grid->location('位置')->display(function ($location) {
+            $local = PubAddress::find($location);
+            return $local ? $local->alll : $location;
+        })->limit(24);
         // $grid->description('描述');
         $grid->status('运行状态')->display(function($status) {
             $a = PubCategory::find($status)->name;
@@ -195,7 +199,7 @@ class NetDeviceController extends Controller
         $columns1 = array_add($columns1, '设备类型', PubCategory::findOrFail($netdevices['type'])->name);
         $columns1 = array_add($columns1, '设备型号', $netdevices['devicetype']);
         $columns1 = array_add($columns1, '设备等级', PubCategory::findOrFail($netdevices['level'])->name);
-        $columns1 = array_add($columns1, '设备位置', $netdevices['location']);
+        $columns1 = array_add($columns1, '设备位置', PubAddress::findOrFail($netdevices['location'])->alll);
         $columns1 = array_add($columns1, '设备描述', $netdevices['description']);
         $columns1 = array_add($columns1, '制造商', PubManufacturer::findOrFail($netdevices['producer'])->name);
         $columns1 = array_add($columns1, '供货商', PubManufacturer::findOrFail($netdevices['supplier'])->name);
@@ -208,7 +212,7 @@ class NetDeviceController extends Controller
         $columns2 = array_add($columns2, '维保日期', $netdevices['maintaindate']);
         $columns2 = array_add($columns2, '更新日期', $netdevices['updatetime']);
         $columns2 = array_add($columns2, '主机名', $netdevices['hostname']);
-        $columns2 = array_add($columns2, '所属项目', $netdevices['project']);
+        $columns2 = array_add($columns2, '所属项目', PubProject::findOrFail($netdevices['project'])->name);
         $data = [
             'columns1' => $columns1,
             'columns2' => $columns2,
@@ -269,7 +273,8 @@ class NetDeviceController extends Controller
 
         // $tab->add('厂商信息', new Table());
         $tab->add('项目信息', '这里展示与项目相关的信息。');
-        $tab->add('操作记录', '这里是关于这个设备的所有操作记录');
+        // $tab->add('操作记录', '这里是关于这个设备的所有操作记录');
+        $tab->addLink('操作记录', '../auth/logs');
 
         return $tab;
     }
@@ -305,7 +310,7 @@ class NetDeviceController extends Controller
             $row->date('maintaindate', '维保日期')->default(date('Y-m-d'));
             $row->datetime('updatetime', '更新日期')->default(date('Y-m-d H:i:s'));
             $row->width(4)->text('hostname', '主机名');
-            $row->width(4)->text('project', '所属项目');
+            $row->width(4)->select('project', '所属项目')->options(Helperr::selectt(0, 'pub_project'));
             
             $row->width(4)->hidden('statusofrecord')->value(0);
             // $row->html('<h4>添加私有屬性</h4>');
@@ -318,7 +323,7 @@ class NetDeviceController extends Controller
             $row->hasMany('pub_properties', '私有属性', function(Form\NestedForm $form){
                 $form->text('proname', '属性名称');
                 $form->text('provalue', '属性值');
-                $form->textarea('prpdesc', '属性描述');
+                $form->textarea('prodesc', '属性描述');
                 $form->hidden('protytype1')->value(0);
             });
         }, $form);

@@ -8,7 +8,7 @@
         margin-right: 10px;
     }
 </style>
-<div class="box box-default">
+<div class="box box-info">
     <div class="box-header with-border">
         <h3 class="box-title">Available extensions</h3>
 

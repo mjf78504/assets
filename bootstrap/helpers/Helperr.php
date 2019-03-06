@@ -5,6 +5,7 @@ use App\Models\PubCategory;
 use App\Models\PubAddress;
 use App\Models\PubContract;
 use App\Models\PubManufacturer;
+use App\Models\PubProject;
 	/** 
 	 *	自定义帮助类
 	 */
@@ -53,6 +54,15 @@ use App\Models\PubManufacturer;
 		        $arr = [];
 		        foreach( $abdds as $abdd) {
 		            $arr = array_add($arr, $abdd->id, $abdd->alll);
+		        }
+            	return $arr;
+
+            // 其他情况直接返回空数组
+	        }else if ($type == 'pub_project') {
+            	$abdds = PubProject::all();
+		        $arr = [];
+		        foreach( $abdds as $abdd) {
+		            $arr = array_add($arr, $abdd->id, $abdd->nickname);
 		        }
             	return $arr;
 

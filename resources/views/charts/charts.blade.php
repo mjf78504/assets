@@ -1,28 +1,24 @@
 <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
 <div id="main" style="width: 600px;height:400px;"></div>
-<p>来吧哥哥- {{ $lailai }}</p>
 
 <!-- 以下为js代码 -->
 <script src="{{ URL::asset('js/echarts.min.js') }}"></script>
 <script type="text/javascript">
-
     // 获取数据的方法
-    var abc = '';
-
     function getData() {
-        $.get("{{ url('api/test') }}", function (data) {
+        $.get("{{ url('api/categories/1') }}", function (data) {
             console.log(data);
-            abc = data.abc;
+            var abc = data.data.name;
+            chart(abc);
         });
     }
-
     getData();
 
-
-    // 基于准备好的dom，初始化echarts实例
-    function chart() {
+    // 定义一个方法封装echarts实例，供给获取数据回调成功后调用。
+    function chart(abc) {
+        // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('main'));
-        console.log('------------开始调用---------');
+        // console.log('------------开始调用---------', abc);
         // 指定图表的配置项和数据
         var option = {
             title: {
@@ -47,5 +43,5 @@
         myChart.setOption(option);
     }
 
-    setTimeout('chart()', 1000);
+    // setTimeout('chart()', 1000);
 </script>

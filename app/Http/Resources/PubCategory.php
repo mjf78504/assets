@@ -14,10 +14,16 @@ class PubCategory extends Resource
      */
     public function toArray($request)
     {
-        // return parent::toArray($request);
-        return [
-            'id' => $this->id,
-            'text' => $this->name
-        ];
+        return parent::toArray($request);
+
+        /*        return [
+                    'id' => $this->id,
+                    'text' => $this->name,
+                    'lailai' => 'Hao shuai de xiao gege !',
+                    'links' => [
+                        'self' => 'link-value',
+                    ],
+                ];
+        */
     }
 }

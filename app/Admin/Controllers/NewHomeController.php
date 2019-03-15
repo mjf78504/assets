@@ -16,6 +16,7 @@ class NewHomeController extends Controller
             ->header('柳州银行')
             ->description(' ')
             ->row(NewDashboard::title())
+            ->row(NewDashboard::charts())
             ->row(function (Row $row) {
 
                 $row->column(3, function (Column $column) {
@@ -36,4 +37,13 @@ class NewHomeController extends Controller
 
             });
     }
+
+    /** 接口调用
+     * public function test()
+     * {
+     * $task = ['abc' => '来吧哥哥在此，休得造次'];
+     * // \Db::info('---------：' . $task['abc']);
+     * return $this->response->arary($task);
+     * }
+     */
 }

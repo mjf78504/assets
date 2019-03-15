@@ -26,7 +26,5 @@ Route::group([
     $router->resource('project', 'PubProjectController');
 
     // 接口
-    $router->get('api/category', function () {
-        return new PubCategoryResource(PubCategory::all());
-    });
+    $router->get('api/test', 'NewHomeController@test');
 });

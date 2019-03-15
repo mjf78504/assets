@@ -34,7 +34,6 @@ class PubCategoryController extends Controller
                 $row->column(4, $this->tree());
                 $row->column(8, $this->grid());
             });
-
     }
 
     /**

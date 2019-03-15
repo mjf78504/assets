@@ -148,4 +148,10 @@ class NewDashboard
 
         return view('admin::dashboard.dependencies', $data);
     }
+
+    public static function charts()
+    {
+        return view('charts.charts', ['lailai' => 'echart.js示例 - 来吧哥哥']);
+    }
+
 }

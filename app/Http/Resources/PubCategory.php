@@ -14,9 +14,9 @@ class PubCategory extends Resource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        // return parent::toArray($request);
 
-        /*        return [
+                return [
                     'id' => $this->id,
                     'text' => $this->name,
                     'lailai' => 'Hao shuai de xiao gege !',
@@ -24,6 +24,6 @@ class PubCategory extends Resource
                         'self' => 'link-value',
                     ],
                 ];
-        */
+
     }
 }

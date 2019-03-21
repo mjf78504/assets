@@ -10,9 +10,12 @@ use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
 use Encore\Admin\Show;
+use App\Models\NetDevice;
 // 用于模型树
 use Encore\Admin\Facades\Admin;
 // use Encore\Admin\Controllers\ModelForm;
+
+use App\Http\Resources\PubCategory as PubCategoryResource;
 
 class PubCategoryController extends Controller
 {
@@ -174,5 +177,23 @@ class PubCategoryController extends Controller
         $form->textarea('description', '描述');
 
         return $form;
+    }
+
+    /**
+     * api 接口信息处理
+     */
+    public function category($category) {
+        return new PubCategoryResource(PubCategory::findOrFail($category)); // 单个资源
+    }
+
+
+    /**
+     * 返回接口單條數據
+     */
+    public static function single() {
+        \Log::info('----你好嗎？-----');
+        return NetDevice::where('category', 17)->where('location', 1)->get();
+
+        // return response()->json(['abc' => '來吧哥哥']);
     }
 }

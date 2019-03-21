@@ -111,7 +111,7 @@ class NewDashboard
 
         // $dependencies = json_decode($json, true)['require'];
 
-        $system = NetDevice::where('category', $category)->count(); // 系统
+        $system = NetDevice::where('category', $category)->count(); // 分組
         $local1 = NetDevice::where('category', $category)->where('location', 1)->count(); // 总行生产
         $local2 = NetDevice::where('category', $category)->where('location', 2)->count(); // 同城生产
         $local3 = NetDevice::where('category', $category)->where('location', 3)->count(); // 总行测试
@@ -148,10 +148,19 @@ class NewDashboard
 
         return view('admin::dashboard.dependencies', $data);
     }
-
-    public static function charts()
+    /**
+     * 读取饼图
+     */
+    public static function pie()
     {
-        return view('charts.charts', ['lailai' => 'echart.js示例 - 来吧哥哥']);
+        return view('charts.pie');
     }
 
+    /**
+     * 读取柱状图
+     */
+    public static function bar()
+    {
+        return view('charts.bar');
+    }
 }

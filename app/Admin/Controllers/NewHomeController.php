@@ -7,7 +7,7 @@ use App\Admin\Controllers\NewDashboard;
 use Encore\Admin\Layout\Column;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Layout\Row;
-
+use Encore\Admin\Widgets\Box;
 class NewHomeController extends Controller
 {
     public function index(Content $content)
@@ -16,7 +16,11 @@ class NewHomeController extends Controller
             ->header('柳州银行')
             ->description(' ')
             ->row(NewDashboard::title())
-            ->row(NewDashboard::charts())
+            ->row(function(Row $row) {
+                $row->column(6, $this->box('pie'));
+                $row->column(6, $this->box('bar'));
+                // $row->column(6, new Box('nihao', NewDashboard::pie()));
+            })
             ->row(function (Row $row) {
 
                 $row->column(3, function (Column $column) {
@@ -37,6 +41,25 @@ class NewHomeController extends Controller
 
             });
     }
+
+    /**
+     * 盒子视图函数
+     */
+    public function box($type) {
+        if ($type == 'pie') {
+            $box = new Box('各组设备总数', NewDashboard::pie());
+        }else {
+            $box = new Box('每月设备新增数量', NewDashboard::bar());
+        }
+        // $box->removable();
+        $box->collapsable();
+        $box->style('info');
+        // $box->solid();
+
+        return $box;
+    }
+
+
 
     /** 接口调用
      * public function test()

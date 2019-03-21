@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\ChartController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,3 +16,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 */
+Route::get('/abc', 'Api\ChartController@single');
